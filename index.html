@@ -131,6 +131,7 @@
     width:100%;
     max-height:100%;
     overflow-y:auto;
+    overscroll-behavior:contain;
     -webkit-overflow-scrolling:touch;
     padding: 4px 4px 16px 4px;
     scrollbar-width:thin;
@@ -138,6 +139,27 @@
   }
   .slide-inner::-webkit-scrollbar{width:5px;}
   .slide-inner::-webkit-scrollbar-thumb{background:var(--rose);border-radius:4px;}
+
+  /* Extra breathing room at the bottom of slides that need to scroll,
+     so the last line of text never sits under the floating nav buttons. */
+  .slide-inner.has-scroll{
+    padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Soft fade cue: hints that there's more to read below, and visually
+     eases text out from behind the nav buttons instead of a hard clip. */
+  .scroll-fade{
+    position:fixed;
+    left:0;right:0;
+    bottom:0;
+    height:126px;
+    background:linear-gradient(to bottom, rgba(253,246,239,0) 0%, var(--cream) 72%);
+    pointer-events:none;
+    z-index:5;
+    opacity:0;
+    transition:opacity .35s ease;
+  }
+  .scroll-fade.show{ opacity:1; }
 
   .ornament{
     display:flex;
@@ -599,6 +621,8 @@
 
 </div>
 
+<div class="scroll-fade" id="scrollFade"></div>
+
 <div class="nav">
   <button id="prevBtn" aria-label="Previous">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>
@@ -626,16 +650,47 @@
   var prevBtn = document.getElementById('prevBtn');
   var nextBtn = document.getElementById('nextBtn');
   var hint = document.getElementById('hint');
+  var scrollFade = document.getElementById('scrollFade');
+
+  function activeInner(){
+    var s = slides[current];
+    return s ? s.querySelector('.slide-inner') : null;
+  }
+
+  // A slide only needs the extra bottom clearance / fade cue if its
+  // content is actually taller than the visible area.
+  function isScrollable(inner){
+    return !!inner && (inner.scrollHeight - inner.clientHeight > 4);
+  }
+
+  function atBottom(inner){
+    return !inner || (inner.scrollHeight - inner.clientHeight - inner.scrollTop <= 4);
+  }
+
+  function atTop(inner){
+    return !inner || inner.scrollTop <= 4;
+  }
+
+  function updateScrollCues(){
+    var inner = activeInner();
+    if(!inner){ scrollFade.classList.remove('show'); return; }
+    var scrollable = isScrollable(inner);
+    inner.classList.toggle('has-scroll', scrollable);
+    scrollFade.classList.toggle('show', scrollable && !atBottom(inner));
+  }
 
   function render(){
     slides.forEach(function(s, i){
       s.classList.toggle('active', i === current);
     });
+    var inner = activeInner();
+    if(inner) inner.scrollTop = 0;
     progressFill.style.width = ((current+1)/total*100) + '%';
     counter.textContent = (current+1) + ' / ' + total;
     prevBtn.disabled = current === 0;
     nextBtn.disabled = current === total - 1;
     hint.style.opacity = current === 0 ? '1' : (current < 3 ? '.55' : '0');
+    updateScrollCues();
   }
 
   function goTo(index){
@@ -646,6 +701,12 @@
 
   function next(){ goTo(current + 1); }
   function prev(){ goTo(current - 1); }
+
+  // Keep the fade cue accurate as the reader scrolls through a long page.
+  // 'scroll' doesn't bubble, so listen during the capture phase.
+  document.addEventListener('scroll', function(e){
+    if(e.target === activeInner()) updateScrollCues();
+  }, true);
 
   // Robust tap binding: handles touch, mouse and pointer input without
   // double-firing (some mobile browsers can otherwise swallow the
@@ -678,14 +739,19 @@
     if(e.key === 'End'){ goTo(total-1); }
   });
 
-  // touch / swipe
-  var touchStartX = 0, touchStartY = 0, touchActive = false;
+  // touch / swipe — a vertical drag only changes the page once the
+  // reader has actually run out of content to scroll in that direction.
+  // Any drag that the inner content absorbs as a scroll never also
+  // flips the page, so there's no more "one extra scroll = next page".
+  var touchStartX = 0, touchStartY = 0, touchActive = false, scrollTopAtStart = 0;
   document.addEventListener('touchstart', function(e){
     if(e.touches.length !== 1) return;
     if(e.target.closest && e.target.closest('.nav, .cover .begin')) return;
     touchStartX = e.touches[0].clientX;
     touchStartY = e.touches[0].clientY;
     touchActive = true;
+    var inner = activeInner();
+    scrollTopAtStart = inner ? inner.scrollTop : 0;
   }, {passive:true});
 
   document.addEventListener('touchend', function(e){
@@ -695,18 +761,31 @@
     var dy = e.changedTouches[0].clientY - touchStartY;
     var absDx = Math.abs(dx), absDy = Math.abs(dy);
     var threshold = 46;
+    var inner = activeInner();
+
     if(absDy > absDx && absDy > threshold){
-      if(dy < 0){ next(); } else { prev(); }
+      var scrollTopAtEnd = inner ? inner.scrollTop : 0;
+      var contentDidScroll = Math.abs(scrollTopAtEnd - scrollTopAtStart) > 2;
+      if(contentDidScroll) return; // this drag just read the page, not turned it
+      if(dy < 0){
+        if(atBottom(inner)) next();
+      } else {
+        if(atTop(inner)) prev();
+      }
     } else if(absDx > absDy && absDx > threshold){
       if(dx < 0){ next(); } else { prev(); }
     }
   }, {passive:true});
 
-  // mouse wheel (desktop, subtle)
+  // mouse wheel (desktop) — same rule: only turn the page once the
+  // active slide has nothing left to scroll in that direction.
   var wheelLock = false;
   window.addEventListener('wheel', function(e){
     if(wheelLock) return;
     if(Math.abs(e.deltaY) < 24) return;
+    var inner = activeInner();
+    if(e.deltaY > 0 && !atBottom(inner)) return;
+    if(e.deltaY < 0 && !atTop(inner)) return;
     wheelLock = true;
     if(e.deltaY > 0){ next(); } else { prev(); }
     setTimeout(function(){ wheelLock = false; }, 550);
