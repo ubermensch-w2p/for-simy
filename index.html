@@ -33,7 +33,7 @@
     color:var(--ink);
     background:var(--cream);
     overflow:hidden;
-    touch-action:none;
+    touch-action:pan-y;
     -webkit-tap-highlight-color:transparent;
   }
 
@@ -210,6 +210,8 @@
     background:rgba(255,255,255,.35);
     backdrop-filter:blur(6px);
     animation:pulse 2.6s ease-in-out infinite;
+    touch-action:manipulation;
+    user-select:none;
   }
   @keyframes pulse{
     0%,100%{transform:scale(1); box-shadow:0 0 0 rgba(124,46,61,0);}
@@ -262,10 +264,13 @@
     cursor:pointer;
     color:var(--wine);
     transition:transform .2s ease, background .2s ease, opacity .3s ease;
+    touch-action:manipulation;
+    -webkit-tap-highlight-color:transparent;
+    user-select:none;
   }
   .nav button:active{transform:scale(.9);}
   .nav button:disabled{opacity:0;pointer-events:none;}
-  .nav button svg{width:18px;height:18px;}
+  .nav button svg{width:18px;height:18px; pointer-events:none;}
 
   .counter{
     position:fixed;
@@ -553,7 +558,7 @@
       <div class="ornament">${HEART}</div>
       <p class="eyebrow">Sukoon</p>
       <div class="content">
-        <p>We reached Sukoon and prepared food, did all the chores at 11 PM at night - said something about us. We both don't shy away from things that must be done. Even on the last day we prepared two meals before heading out to the airport. We prioritize the essentials even when it's difficult. And we were able to do all that because we have our priorities aligned - clean, home-cooked meals. Honestly, I loved those cooking sessions with you. I'm glad I could assist you in whatever way possible. Sukoon was true to it's name. I felt at peace with you by my side and everything single thing we did together felt comforting.</p>
+        <p>We reached Sukoon and prepared food, did all the chores at 11 PM at night - said something about us. We both don't shy away from things that must be done. Even on the last day we prepared two meals before heading out to the airport. We prioritize the essentials even when it's difficult. And we were able to do all that because we have our priorities aligned - clean, home-cooked meals. Honestly, I loved those cooking sessions with you. I'm glad I could assist you in whatever way possible. Sukoon was true to its name. I felt at peace with you by my side, and every single thing we did together felt comforting.</p>
       </div>
     </div>
   </section>
@@ -642,9 +647,29 @@
   function next(){ goTo(current + 1); }
   function prev(){ goTo(current - 1); }
 
-  prevBtn.addEventListener('click', prev);
-  nextBtn.addEventListener('click', next);
-  document.getElementById('beginBtn').addEventListener('click', next);
+  // Robust tap binding: handles touch, mouse and pointer input without
+  // double-firing (some mobile browsers can otherwise swallow the
+  // synthetic click that follows a touch when custom gesture handling
+  // is present elsewhere on the page).
+  function bindTap(el, handler){
+    if(!el) return;
+    var touchHandled = false;
+    el.addEventListener('touchend', function(e){
+      touchHandled = true;
+      e.preventDefault();
+      e.stopPropagation();
+      handler();
+      setTimeout(function(){ touchHandled = false; }, 500);
+    }, {passive:false});
+    el.addEventListener('click', function(e){
+      if(touchHandled) return;
+      handler();
+    });
+  }
+
+  bindTap(prevBtn, prev);
+  bindTap(nextBtn, next);
+  bindTap(document.getElementById('beginBtn'), next);
 
   window.addEventListener('keydown', function(e){
     if(['ArrowDown','ArrowRight',' ','PageDown'].indexOf(e.key) > -1){ e.preventDefault(); next(); }
@@ -654,4 +679,42 @@
   });
 
   // touch / swipe
-  var touchS
+  var touchStartX = 0, touchStartY = 0, touchActive = false;
+  document.addEventListener('touchstart', function(e){
+    if(e.touches.length !== 1) return;
+    if(e.target.closest && e.target.closest('.nav, .cover .begin')) return;
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    touchActive = true;
+  }, {passive:true});
+
+  document.addEventListener('touchend', function(e){
+    if(!touchActive) return;
+    touchActive = false;
+    var dx = e.changedTouches[0].clientX - touchStartX;
+    var dy = e.changedTouches[0].clientY - touchStartY;
+    var absDx = Math.abs(dx), absDy = Math.abs(dy);
+    var threshold = 46;
+    if(absDy > absDx && absDy > threshold){
+      if(dy < 0){ next(); } else { prev(); }
+    } else if(absDx > absDy && absDx > threshold){
+      if(dx < 0){ next(); } else { prev(); }
+    }
+  }, {passive:true});
+
+  // mouse wheel (desktop, subtle)
+  var wheelLock = false;
+  window.addEventListener('wheel', function(e){
+    if(wheelLock) return;
+    if(Math.abs(e.deltaY) < 24) return;
+    wheelLock = true;
+    if(e.deltaY > 0){ next(); } else { prev(); }
+    setTimeout(function(){ wheelLock = false; }, 550);
+  }, {passive:true});
+
+  render();
+})();
+</script>
+
+</body>
+</html>
