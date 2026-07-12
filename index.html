@@ -98,8 +98,8 @@
   .stage{
     position:relative;
     z-index:1;
-    height:100dvh;
     height:100vh;
+    height:100dvh;
     width:100%;
   }
 
@@ -109,7 +109,10 @@
     display:flex;
     align-items:center;
     justify-content:center;
-    padding: max(9vh, 36px) 7vw calc(max(9vh, 36px) + env(safe-area-inset-bottom, 0px)) 7vw;
+    padding-top: max(8vh, 30px);
+    padding-bottom: calc(max(8vh, 30px) + env(safe-area-inset-bottom, 0px));
+    padding-left: max(7vw, calc(64px + env(safe-area-inset-left, 0px)));
+    padding-right: max(7vw, calc(64px + env(safe-area-inset-right, 0px)));
     opacity:0;
     transform:translateY(28px) scale(.985);
     transition:opacity .65s cubic-bezier(.22,1,.36,1), transform .65s cubic-bezier(.22,1,.36,1);
@@ -131,29 +134,26 @@
     width:100%;
     max-height:100%;
     overflow-y:auto;
-    overscroll-behavior:contain;
+    overflow-x:hidden;
+    overscroll-behavior-y:contain;
+    touch-action:pan-y;
     -webkit-overflow-scrolling:touch;
-    padding: 4px 4px 16px 4px;
+    padding: 4px 4px 22px 4px;
     scrollbar-width:thin;
     scrollbar-color:var(--rose) transparent;
   }
   .slide-inner::-webkit-scrollbar{width:5px;}
   .slide-inner::-webkit-scrollbar-thumb{background:var(--rose);border-radius:4px;}
 
-  /* Extra breathing room at the bottom of slides that need to scroll,
-     so the last line of text never sits under the floating nav buttons. */
-  .slide-inner.has-scroll{
-    padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px));
-  }
-
-  /* Soft fade cue: hints that there's more to read below, and visually
-     eases text out from behind the nav buttons instead of a hard clip. */
+  /* Soft fade cue: purely a "there's more below" hint for scrollable
+     pages — reading and page-turning are separate gestures now, so
+     this is cosmetic rather than load-bearing for avoiding overlap. */
   .scroll-fade{
     position:fixed;
     left:0;right:0;
     bottom:0;
-    height:126px;
-    background:linear-gradient(to bottom, rgba(253,246,239,0) 0%, var(--cream) 72%);
+    height:64px;
+    background:linear-gradient(to bottom, rgba(253,246,239,0) 0%, var(--cream) 85%);
     pointer-events:none;
     z-index:5;
     opacity:0;
@@ -230,6 +230,7 @@
     border-radius:40px;
     cursor:pointer;
     background:rgba(255,255,255,.35);
+    -webkit-backdrop-filter:blur(6px);
     backdrop-filter:blur(6px);
     animation:pulse 2.6s ease-in-out infinite;
     touch-action:manipulation;
@@ -261,68 +262,68 @@
     margin:2px 0 0 0;
   }
 
-  /* Navigation */
-  .nav{
+  /* Navigation — page-turn buttons live on the side edges, well clear
+     of the reading column, so they never sit over text at any scroll
+     position. Vertical space (top/bottom) is reserved for reading. */
+  .nav-btn{
     position:fixed;
-    left:0;right:0;
-    bottom:calc(18px + env(safe-area-inset-bottom, 0px));
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:22px;
-    z-index:10;
-    pointer-events:none;
-  }
-  .nav button{
-    pointer-events:auto;
-    width:46px;height:46px;
+    top:50%;
+    transform:translateY(-50%);
+    width:42px;height:42px;
     border-radius:50%;
-    border:1px solid rgba(124,46,61,.25);
-    background:rgba(255,255,255,.55);
+    border:1px solid rgba(124,46,61,.22);
+    background:rgba(255,255,255,.6);
+    -webkit-backdrop-filter:blur(8px);
     backdrop-filter:blur(8px);
     display:flex;
     align-items:center;
     justify-content:center;
     cursor:pointer;
     color:var(--wine);
+    z-index:10;
     transition:transform .2s ease, background .2s ease, opacity .3s ease;
     touch-action:manipulation;
     -webkit-tap-highlight-color:transparent;
     user-select:none;
   }
-  .nav button:active{transform:scale(.9);}
-  .nav button:disabled{opacity:0;pointer-events:none;}
-  .nav button svg{width:18px;height:18px; pointer-events:none;}
+  #prevBtn{ left: calc(8px + env(safe-area-inset-left, 0px)); }
+  #nextBtn{ right: calc(8px + env(safe-area-inset-right, 0px)); }
+  .nav-btn:active{ transform:translateY(-50%) scale(.88); }
+  .nav-btn:disabled{ opacity:0; pointer-events:none; }
+  .nav-btn svg{ width:17px;height:17px; pointer-events:none; }
 
   .counter{
     position:fixed;
+    top:calc(14px + env(safe-area-inset-top, 0px));
     right:calc(16px + env(safe-area-inset-right, 0px));
-    bottom:calc(20px + env(safe-area-inset-bottom, 0px));
     font-family:'Playfair Display', serif;
     font-style:italic;
-    font-size:.78rem;
+    font-size:.74rem;
     color:var(--ink-soft);
     letter-spacing:.05em;
     z-index:10;
     background:rgba(253,246,239,.7);
-    padding:4px 10px;
+    padding:3px 10px;
     border-radius:20px;
   }
 
   .hint{
     position:fixed;
     left:50%;
-    bottom:calc(74px + env(safe-area-inset-bottom, 0px));
+    bottom:calc(14px + env(safe-area-inset-bottom, 0px));
     transform:translateX(-50%);
     font-family:'Playfair Display', serif;
     font-style:italic;
-    font-size:.7rem;
-    letter-spacing:.08em;
+    font-size:.68rem;
+    letter-spacing:.06em;
     color:var(--ink-soft);
     opacity:.55;
-    z-index:10;
+    z-index:6;
     text-align:center;
     pointer-events:none;
+    background:rgba(253,246,239,.7);
+    padding:3px 12px;
+    border-radius:20px;
   }
 
   @media (min-width: 720px){
@@ -330,7 +331,10 @@
   }
 
   @media (max-height: 620px){
-    .slide{ padding-top:5vh; padding-bottom:5vh; }
+    .slide{
+      padding-top:4vh;
+      padding-bottom: calc(4vh + env(safe-area-inset-bottom, 0px));
+    }
     .eyebrow{ margin-bottom:14px; }
   }
 </style>
@@ -623,17 +627,15 @@
 
 <div class="scroll-fade" id="scrollFade"></div>
 
-<div class="nav">
-  <button id="prevBtn" aria-label="Previous">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>
-  </button>
-  <button id="nextBtn" aria-label="Next">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-  </button>
-</div>
+<button id="prevBtn" class="nav-btn" aria-label="Previous page">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+</button>
+<button id="nextBtn" class="nav-btn" aria-label="Next page">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+</button>
 
 <div class="counter" id="counter">1 / 27</div>
-<div class="hint" id="hint">swipe up, or tap the arrows</div>
+<div class="hint" id="hint">swipe sideways to turn the page · scroll to read</div>
 
 <script>
 (function(){
@@ -657,26 +659,16 @@
     return s ? s.querySelector('.slide-inner') : null;
   }
 
-  // A slide only needs the extra bottom clearance / fade cue if its
-  // content is actually taller than the visible area.
-  function isScrollable(inner){
-    return !!inner && (inner.scrollHeight - inner.clientHeight > 4);
-  }
-
-  function atBottom(inner){
-    return !inner || (inner.scrollHeight - inner.clientHeight - inner.scrollTop <= 4);
-  }
-
-  function atTop(inner){
-    return !inner || inner.scrollTop <= 4;
-  }
-
+  // Purely cosmetic: show a "more below" fade while a long page still
+  // has unread content underneath. Has no bearing on page-turning —
+  // reading (vertical) and turning pages (horizontal) are now fully
+  // separate gestures, so there is nothing for this to conflict with.
   function updateScrollCues(){
     var inner = activeInner();
     if(!inner){ scrollFade.classList.remove('show'); return; }
-    var scrollable = isScrollable(inner);
-    inner.classList.toggle('has-scroll', scrollable);
-    scrollFade.classList.toggle('show', scrollable && !atBottom(inner));
+    var scrollable = inner.scrollHeight - inner.clientHeight > 4;
+    var atBottom = inner.scrollHeight - inner.clientHeight - inner.scrollTop <= 4;
+    scrollFade.classList.toggle('show', scrollable && !atBottom);
   }
 
   function render(){
@@ -689,7 +681,7 @@
     counter.textContent = (current+1) + ' / ' + total;
     prevBtn.disabled = current === 0;
     nextBtn.disabled = current === total - 1;
-    hint.style.opacity = current === 0 ? '1' : (current < 3 ? '.55' : '0');
+    hint.style.opacity = current === 0 ? '1' : (current < 3 ? '.5' : '0');
     updateScrollCues();
   }
 
@@ -732,26 +724,29 @@
   bindTap(nextBtn, next);
   bindTap(document.getElementById('beginBtn'), next);
 
+  // Keyboard: left/right (and Page Up/Down, Space) turn pages, matching
+  // the horizontal swipe gesture. Up/Down are left alone so they keep
+  // their normal browser behaviour of scrolling the page content.
   window.addEventListener('keydown', function(e){
-    if(['ArrowDown','ArrowRight',' ','PageDown'].indexOf(e.key) > -1){ e.preventDefault(); next(); }
-    if(['ArrowUp','ArrowLeft','PageUp'].indexOf(e.key) > -1){ e.preventDefault(); prev(); }
+    if(['ArrowRight',' ','PageDown'].indexOf(e.key) > -1){ e.preventDefault(); next(); }
+    if(['ArrowLeft','PageUp'].indexOf(e.key) > -1){ e.preventDefault(); prev(); }
     if(e.key === 'Home'){ goTo(0); }
     if(e.key === 'End'){ goTo(total-1); }
   });
 
-  // touch / swipe — a vertical drag only changes the page once the
-  // reader has actually run out of content to scroll in that direction.
-  // Any drag that the inner content absorbs as a scroll never also
-  // flips the page, so there's no more "one extra scroll = next page".
-  var touchStartX = 0, touchStartY = 0, touchActive = false, scrollTopAtStart = 0;
+  // Page-turning gesture: HORIZONTAL swipe only. Vertical drags are
+  // never touched by this handler at all — touch-action:pan-y on the
+  // scrollable content means a vertical drag is handled entirely by
+  // the browser's native scrolling, with zero JS in the loop. That
+  // full separation is what makes reading and turning pages feel
+  // predictable instead of tangled together.
+  var touchStartX = 0, touchStartY = 0, touchActive = false;
   document.addEventListener('touchstart', function(e){
     if(e.touches.length !== 1) return;
-    if(e.target.closest && e.target.closest('.nav, .cover .begin')) return;
+    if(e.target.closest && e.target.closest('.nav-btn, .cover .begin')) return;
     touchStartX = e.touches[0].clientX;
     touchStartY = e.touches[0].clientY;
     touchActive = true;
-    var inner = activeInner();
-    scrollTopAtStart = inner ? inner.scrollTop : 0;
   }, {passive:true});
 
   document.addEventListener('touchend', function(e){
@@ -759,36 +754,11 @@
     touchActive = false;
     var dx = e.changedTouches[0].clientX - touchStartX;
     var dy = e.changedTouches[0].clientY - touchStartY;
-    var absDx = Math.abs(dx), absDy = Math.abs(dy);
-    var threshold = 46;
-    var inner = activeInner();
-
-    if(absDy > absDx && absDy > threshold){
-      var scrollTopAtEnd = inner ? inner.scrollTop : 0;
-      var contentDidScroll = Math.abs(scrollTopAtEnd - scrollTopAtStart) > 2;
-      if(contentDidScroll) return; // this drag just read the page, not turned it
-      if(dy < 0){
-        if(atBottom(inner)) next();
-      } else {
-        if(atTop(inner)) prev();
-      }
-    } else if(absDx > absDy && absDx > threshold){
+    if(Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 56){
       if(dx < 0){ next(); } else { prev(); }
     }
-  }, {passive:true});
-
-  // mouse wheel (desktop) — same rule: only turn the page once the
-  // active slide has nothing left to scroll in that direction.
-  var wheelLock = false;
-  window.addEventListener('wheel', function(e){
-    if(wheelLock) return;
-    if(Math.abs(e.deltaY) < 24) return;
-    var inner = activeInner();
-    if(e.deltaY > 0 && !atBottom(inner)) return;
-    if(e.deltaY < 0 && !atTop(inner)) return;
-    wheelLock = true;
-    if(e.deltaY > 0){ next(); } else { prev(); }
-    setTimeout(function(){ wheelLock = false; }, 550);
+    // A vertical-dominant gesture is left alone entirely — it was
+    // already handled as a native scroll while it was happening.
   }, {passive:true});
 
   render();
