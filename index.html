@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#fdf6f0">
+<title>For Simy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Playfair+Display:ital,wght@0,600;0,700;1,500&family=Dancing+Script:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#fdf6ef;
+    --cream2:#f6e9df;
+    --wine:#7c2e3d;
+    --wine-dark:#54202b;
+    --rose:#e2a6b4;
+    --gold:#c39a52;
+    --ink:#3b2c2c;
+    --ink-soft:#7a6660;
+  }
+
+  *{box-sizing:border-box;}
+
+  html,body{
+    height:100%;
+    margin:0;
+    overscroll-behavior:none;
+  }
+
+  body{
+    font-family:'Cormorant Garamond', serif;
+    color:var(--ink);
+    background:var(--cream);
+    overflow:hidden;
+    touch-action:none;
+    -webkit-tap-highlight-color:transparent;
+  }
+
+  /* ambient background */
+  .bg{
+    position:fixed;
+    inset:0;
+    z-index:0;
+    overflow:hidden;
+    background:
+      radial-gradient(ellipse at top left, var(--cream2) 0%, transparent 55%),
+      radial-gradient(ellipse at bottom right, var(--cream2) 0%, transparent 55%),
+      var(--cream);
+  }
+  .bg .blob{
+    position:absolute;
+    border-radius:50%;
+    filter:blur(70px);
+    opacity:.35;
+    animation:drift 26s ease-in-out infinite alternate;
+  }
+  .bg .blob.one{
+    width:46vmax;height:46vmax;
+    background:var(--rose);
+    top:-14vmax;left:-14vmax;
+    animation-duration:30s;
+  }
+  .bg .blob.two{
+    width:38vmax;height:38vmax;
+    background:var(--gold);
+    bottom:-12vmax;right:-10vmax;
+    animation-duration:24s;
+    animation-delay:-6s;
+  }
+  .bg .blob.three{
+    width:30vmax;height:30vmax;
+    background:var(--wine);
+    opacity:.12;
+    top:40%;left:60%;
+    animation-duration:34s;
+    animation-delay:-14s;
+  }
+  @keyframes drift{
+    0%{transform:translate(0,0) scale(1);}
+    100%{transform:translate(6vmax,4vmax) scale(1.12);}
+  }
+
+  .progress-track{
+    position:fixed;
+    top:0;left:0;right:0;
+    height:3px;
+    background:rgba(124,46,61,.12);
+    z-index:20;
+  }
+  .progress-fill{
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg, var(--gold), var(--wine));
+    transition:width .6s cubic-bezier(.65,0,.35,1);
+  }
+
+  .stage{
+    position:relative;
+    z-index:1;
+    height:100dvh;
+    height:100vh;
+    width:100%;
+  }
+
+  .slide{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: max(9vh, 36px) 7vw calc(max(9vh, 36px) + env(safe-area-inset-bottom, 0px)) 7vw;
+    opacity:0;
+    transform:translateY(28px) scale(.985);
+    transition:opacity .65s cubic-bezier(.22,1,.36,1), transform .65s cubic-bezier(.22,1,.36,1);
+    pointer-events:none;
+  }
+  .slide.active{
+    opacity:1;
+    transform:translateY(0) scale(1);
+    pointer-events:auto;
+    z-index:2;
+  }
+  .slide.leaving{
+    opacity:0;
+    transform:translateY(-24px) scale(.985);
+  }
+
+  .slide-inner{
+    max-width:640px;
+    width:100%;
+    max-height:100%;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    padding: 4px 4px 16px 4px;
+    scrollbar-width:thin;
+    scrollbar-color:var(--rose) transparent;
+  }
+  .slide-inner::-webkit-scrollbar{width:5px;}
+  .slide-inner::-webkit-scrollbar-thumb{background:var(--rose);border-radius:4px;}
+
+  .ornament{
+    display:flex;
+    justify-content:center;
+    margin-bottom:14px;
+    opacity:.85;
+  }
+  .ornament svg{width:26px;height:26px;stroke:var(--gold);}
+
+  .eyebrow{
+    font-family:'Playfair Display', serif;
+    font-style:italic;
+    font-weight:500;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    font-size:.72rem;
+    color:var(--wine);
+    text-align:center;
+    margin:0 0 22px 0;
+    opacity:.85;
+  }
+  .eyebrow::before{
+    content:"";
+  }
+
+  .content p{
+    font-size:clamp(1.12rem, 1.1rem + 1vw, 1.55rem);
+    line-height:1.75;
+    color:var(--ink);
+    text-align:left;
+    margin:0 0 1.1em 0;
+    font-weight:500;
+  }
+  .content p:last-child{margin-bottom:0;}
+
+  .content i{ color:var(--wine); font-style:italic; }
+
+  /* Cover slide */
+  .cover{
+    text-align:center;
+  }
+  .cover .title{
+    font-family:'Dancing Script', cursive;
+    font-weight:700;
+    font-size:clamp(3rem, 8vw, 5.2rem);
+    color:var(--wine-dark);
+    margin:0 0 6px 0;
+  }
+  .cover .subtitle{
+    font-family:'Playfair Display', serif;
+    font-style:italic;
+    font-size:clamp(1rem, 2vw, 1.25rem);
+    color:var(--ink-soft);
+    letter-spacing:.05em;
+    margin:0 0 46px 0;
+  }
+  .cover .begin{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    font-family:'Playfair Display', serif;
+    font-style:italic;
+    font-size:1rem;
+    letter-spacing:.08em;
+    color:var(--wine);
+    border:1px solid var(--gold);
+    padding:12px 28px;
+    border-radius:40px;
+    cursor:pointer;
+    background:rgba(255,255,255,.35);
+    backdrop-filter:blur(6px);
+    animation:pulse 2.6s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{transform:scale(1); box-shadow:0 0 0 rgba(124,46,61,0);}
+    50%{transform:scale(1.035); box-shadow:0 0 18px rgba(124,46,61,.12);}
+  }
+
+  /* Closing / signature slide */
+  .closing .content p{ text-align:center; }
+  .signature{
+    margin-top:34px;
+    text-align:center;
+  }
+  .signature .love{
+    font-family:'Playfair Display', serif;
+    font-style:italic;
+    font-size:1.15rem;
+    color:var(--ink-soft);
+    margin:0;
+  }
+  .signature .name{
+    font-family:'Dancing Script', cursive;
+    font-weight:700;
+    font-size:clamp(2.2rem, 6vw, 3.2rem);
+    color:var(--wine-dark);
+    margin:2px 0 0 0;
+  }
+
+  /* Navigation */
+  .nav{
+    position:fixed;
+    left:0;right:0;
+    bottom:calc(18px + env(safe-area-inset-bottom, 0px));
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:22px;
+    z-index:10;
+    pointer-events:none;
+  }
+  .nav button{
+    pointer-events:auto;
+    width:46px;height:46px;
+    border-radius:50%;
+    border:1px solid rgba(124,46,61,.25);
+    background:rgba(255,255,255,.55);
+    backdrop-filter:blur(8px);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    color:var(--wine);
+    transition:transform .2s ease, background .2s ease, opacity .3s ease;
+  }
+  .nav button:active{transform:scale(.9);}
+  .nav button:disabled{opacity:0;pointer-events:none;}
+  .nav button svg{width:18px;height:18px;}
+
+  .counter{
+    position:fixed;
+    right:calc(16px + env(safe-area-inset-right, 0px));
+    bottom:calc(20px + env(safe-area-inset-bottom, 0px));
+    font-family:'Playfair Display', serif;
+    font-style:italic;
+    font-size:.78rem;
+    color:var(--ink-soft);
+    letter-spacing:.05em;
+    z-index:10;
+    background:rgba(253,246,239,.7);
+    padding:4px 10px;
+    border-radius:20px;
+  }
+
+  .hint{
+    position:fixed;
+    left:50%;
+    bottom:calc(74px + env(safe-area-inset-bottom, 0px));
+    transform:translateX(-50%);
+    font-family:'Playfair Display', serif;
+    font-style:italic;
+    font-size:.7rem;
+    letter-spacing:.08em;
+    color:var(--ink-soft);
+    opacity:.55;
+    z-index:10;
+    text-align:center;
+    pointer-events:none;
+  }
+
+  @media (min-width: 720px){
+    .content p{ font-size:1.4rem; }
+  }
+
+  @media (max-height: 620px){
+    .slide{ padding-top:5vh; padding-bottom:5vh; }
+    .eyebrow{ margin-bottom:14px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg">
+  <div class="blob one"></div>
+  <div class="blob two"></div>
+  <div class="blob three"></div>
+</div>
+
+<div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+
+<div class="stage" id="stage">
+
+  <section class="slide cover" data-title="Cover">
+    <div class="slide-inner">
+      <p class="title">Dear Simy..</p>
+      <p class="subtitle">a letter, one month after our nine days</p>
+      <div class="begin" id="beginBtn">Begin reading ✦</div>
+    </div>
+  </section>
+
+  <section class="slide" data-title="A Mixed Heart">
+    <div class="slide-inner">
+      <div class="ornament">${HEART}</div>
+      <p class="eyebrow">A Mixed Heart</p>
+      <div class="content">
+        <p>I must start with the honest admission that I was pretty optimistic that we'd be having a good time on our trip. After my 2nd trip to Bangalore, we were talking like crazy and had developed all the comfort needed for us to go on a trip together. I knew we could talk for hours at a time without noticing the clock. But at times I wondered if 9 days would be just too much even for us to talk and talk and talk. Isiliye sometimes I feared that we may just have planned the trip a bit too long. Then it was also going to be my first trip ever with any girl, so I was nervous on that part too. So to start off, I was having mixed feelings about the trip. But even so, I promised myself not to overthink and to approach the trip with an open heart..</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-title="Before I Begin">
+    <div class="slide-inner">
+      <div class="ornament">${HEART}</div>
+      <p class="eyebrow">Before I Begin</p>
+      <div class="content">
+        <p>Oh god, I fear if I keep on writing like this, this will probably take me days to complete. So I'll try to be brief. (To the extent possible 😂)</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-title="The Handshake">
+    <div class="slide-inner">
+      <div class="ornament">${HEART}</div>
+      <p class="eyebrow">The Handshake</p>
+      <div class="content">
+        <p>Yr fir kya.. It was the 13th of June, and when I saw you at the airport some mischief occurred in my head. That is why I decided to sneak up on you and approach you from the back and not face to face. I was thinking of surprising and hugging you from behind. But all of it was in my head, and when the moment came I ended up offering a handshake.. poor me.. sara plan ka satyanash ho gya.. darr tha kahin faltu fokat jhapad na pad jaye. 😅 That handshake I'm sure you'll continue to taunt me with for a long time. The point I wish to make here, though, is that I have always been unsure about how to react around you. I think one way and end up reacting the complete opposite way. Probably I still get nervous around you in certain situations.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-title="Rishikesh">
+    <div class="slide-inner">
+      <div class="ornament">${HEART}</div>
+      <p class="eyebrow">Rishikesh</p>
+      <div class="content">
+        <p>Then we reached Rishikesh and the drama around the live location started. I feared that this trip was doomed to be a short one. I won't go into the details of that as we have discussed it abundantly. Yet one aspect of that episode, I feel, helped us enormously. The vulnerability it created early on in our trip, and the way we handled it, created an unsaid safe space. I felt genuinely happy and realised that the trip was a great reposing of trust in me on your end. That despite all the restrictions, you made time for the trip and lied to save it - and that too for me, someone whom you knew but perhaps not too well at that point in time. From my point of view, that moment led me to the realisation that you coming for the trip was indeed the leap of faith I was always asking you to take. So at this point I must take a break and thank you for placing your trust in me. God knows how much I had wished for it to come true.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-title="The First Night">
+    <div class="slide-inner">
+      <div class="ornament">${HEART}</div>
+      <p class="eyebrow">The First Night</p>
+      <div class="content">
+        <p>But, resuming the thread. Our Airbnb stay started. One moment from our very first night which I can't shake off from my head is the hint that you may have had a change in the way you felt for me. I had conveyed my feelings long ago, and you had said a few things earlier. But that moment was the one where I felt seen by you in a different light. I did not take the conversation further that day just because you were not feeling well, all cramped up and headachy. But deep inside I knew what you were alluding to. I was as happy as a lark. I knew at that point that the trip was going to unfold in the right direction.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-title="Groundhog Day">
+    <div class="slide-inner">
+      <div class="ornament">${HEART}</div>
+      <p class="eyebrow">Groundhog Day</p>
+      <div class="content">
+        <p>The second day, after we finished our movie (Groundhog Day), the topic resurfaced. All credit to you for bringing it up again after the movie ended. After mustering enough courage I expressed what I feel for you. I had done this plenty of times before, but this time it was different. You were present in person, we were in a lot more cozy and intimate a space, and I was almost certain that the feeling was mutual (I had some clue from the day before). So unlike Olive, where I had expressed it for the first time and it too was a cozy space, the difference this time was that I was more comfortable and certain of you reciprocating. Exactly that happened. You reciprocated my feelings, and at that moment I felt ecstatic ❤️. I was just elated to hear those three magical words for the first time.. and yes, it was the 15th of June.. yaad rakhna. 😅 Nai to mai to hun hi yaad dilane. That moment was truly very special for me. I'll always remember it fondly. Then the nervousness after expressing it, the heavy breaths, you pacing.. Ohh, I can't shake off that image from my head. I realised at that moment that it deserved to be sealed with a kiss. I asked you for it (probably in a pathetic way), but everything that came next was truly special. I will always remember it, for it was my first kiss, and it could not have been more special. It was better than what I had romanticized in my head. My nerves were on edge, and trust me, my heart was racing at that point. But you did what you always do to me - you made me feel seen and at home. Thanks, miss, for making me feel special. I must add.. I was always fascinated by your laughter.. but had never hoped to get the taste of your smile.. It was truly a fabulous experience.. my first kiss.. 💋</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-title="The Little Things">
+    <div class="slide-inner">
+      <div class="ornament">${HEART}</div>
+      <p class="eyebrow">The Little Things</p>
+      <div class="content">
+        <p>Amidst all this we did everything together, from getting up, to preparing tea, to all 3 meals and everything in between. All these activities, which I must say I'm not very enthusiastic about, felt different. As strange as it may sound, doing chores was interesting and I looked forward to doing them. These activities became special just because you were around, and of all things, I love being around you. I felt I could do anything with you around. Now I realise that it is the company that makes things interesting. Even the lamest of things turn interesting when you have good company around you. I had the best company in you - a friend and a lover. All we did together, with you around, gave me a prelude to what was in store for me. I felt my future looked promising, because I really liked all I did with you and alongside you.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-title="Babe Rider">
+    <div class="slide-inner">
+      <div class="ornament">${HEART}</div>
+      <p class="eyebrow">Babe Rider</p>
+      <div class="content">
+        <p>Ever since we met I was always aware that you are a happy and playful soul. But it was on the day of our rafting (babe rider 😅) that I got to see that side unhindered. I guess mother Ganges brings out your inner child. There was something special about that day. Not in some extraordinary way, but observing your childlike play, for some reason, made me happy. It was inviting me to join the fun, prodding me to summon my playful side too. You have that effect on me where I tend to forget about the world around me for a bit and just go with the flow. It's a great feeling for me, as I have always been very conscious of how I behave publicly. Putting on that serious look all the time is tiring and taxing. So when I let go of my self-imposed hindrances I feel alive and cheerful, where for one second I stop processing all the external noise of what others think about me. It's a really good feeling to have. Also, on a side note, I can't forget the sun-kissed face you had that day. All glowy and radiant. Girl, you truly are beautiful.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-title="The Open Road">
+    <div class="slide-inner">
+      <div class="ornament">${HEART}</div>
+      <p class="eyebrow">The Open Road</p>
+      <div class="content">
+        <p>The bike trips with you were super fun. The journey to Parmarth Niketan, with all its twists and turns, led me to the eventual realisation that we are a thing. It was starting to sink in. While on the road, with you hugging me and us sharing conversations, I wished the road never ended and, of course, that time stopped ticking. I felt free, truly free. Just like the earlier day where I felt you silenced the outside noise, on the bike trips I felt that my inner voices were getting silenced too. My monkey mind was finally starting to learn to be at peace. I was truly living the moment, not preoccupied with the past or future, just the present - with you behind me and all the road ahead of us. I really wish that moment never ended. Bhaiya ko reporting nai karni hoti periodically to shayad ye wali feelings mai experience nai kar pata. Those periodic updates, I now feel, were a blessing in disguise. We did things which probably we would not have done, given those steamy nights 😉.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-title="Kunjapuri">
+    <div class="slide-inner">
+      <div class="ornament">${HEART}</div>
+      <p class="eyebrow">Kunjapuri</p>
+      <div class="content">
+        <p>Sunrise view from Kunjapuri temple to nai ho paya, but ham gaye wahi bahut tha. Mujhe nai lag rha tha we'll be able to make it. But we did, and also with poha taiyar 😄. Temple visits with you have a special appeal, I don't know why. Maybe my Vaikuntha Hill ISKCON experience has created this sensation in me where I long for calm with you around, and what better place to find calm than not-so-crowded temples. So I was sure Kunjapuri was going to be fun too. There were a few moments that stuck with me from that day. While climbing the stairs to the temple, you were talking to Meghana as it was her birthday. She probably asked how the trip was going, to which you said it was going great. I was not expecting you to hand over the phone to me thereafter. I know you have shared about your friends, and I've met most of them personally, but that act made me feel like you were silently inviting me into your innermost circle of comfort. Then the temple experience itself was a bit uncanny, but Chandi mata k darbaar mai thoda to expected tha. Still, that experience of getting inside the garbhagriha of a temple revered as a shaktipeeth was a great experience in itself. I felt like our story had the blessings of the gods, and they were the ones aligning the stars and carving the path for us to be drawn to each other and eventually find one another. I just prayed for the gods to help me continue on the best path possible, but I knew where all those paths were leading - it had to be you. Then on the way back, we were chanting "ya devi sarv bhuteshu" and going down the stairs. It was like us praying to the goddess to bestow her blessing on us towards our shared goal. I don't know how you felt about these seemingly ordinary moments - maybe it is me and all my imagination attaching much more meaning to these than necessary. But whatever it is, all of these unsaid things were grand gestures to which I romanticized great meaning.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-title="Captured">
+    <div class="slide-inner">
+      <div class="ornament">${HEART}</div>
+      <p class="eyebrow">Captured</p>
+      <div class="content">
+        <p>One honest admission here - I'm not the kind of guy who asks people to get us clicked. But on both counts, Parmarth Niketan and Kunjapuri, I hardly thought before asking for help. It's not a big deal, but I realise that with you in the vicinity I start mimicking you. You definitely bring out newer versions of me that I myself am unaware of. With you around I'm surprised by my own behaviour. But also, I could not have missed out on capturing those moments with you. Your smile truly has me captivated, and I am glad I have those moments captured for posterity. They have become my go-to place to fondly remember those wonderful days we had.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-title="Not Ready to Let Go">
+    <div class="slide-inner">
+      <div class="ornament">${HEART}</div>
+      <p class="eyebrow">Not Ready to Let Go</p>
+      <div class="content">
+        <p>At this point of our trip, my initial qualms about having planned a trip too long for comfort had faded entirely. Rather, I was kinda sad that the trip was almost nearing its end, but I was more happy than sad, as I knew at heart that we had connected on a different plane. You can only feel sad about a trip ending because you wanted it to never end.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-title="Candlelight">
+    <div class="slide-inner">
+      <div class="ornament">${HEART}</div>
+      <p class="eyebrow">Candlelight</p>
+      <div class="content">
+        <p>Amidst all this, you accepted my proposal for an official candlelight dinner date. Again, it was not at all flashy going by societal standards, but as is with us, ham to apna rules and precedents set karte hai. We dressed up, had a really large pizza (all thanks to you again 😋), and talked. I realised that to have a good time with you, fancy restaurants and retreats are not needed. I'm not saying we won't ever do those things or explore the outside world - those are definitely needed too, for a change. But what I'm saying is that I don't want us to associate good times with fancy things and beautiful places, because then we would have limited chances to have fun when day-to-day life kicks in. I feel that we need to find ways to bring those good times into our routine life, so that we have unlimited potential. I seriously intend to keep that chemistry alive between us for all time to come, and for that to continue I just need you close by my side. Nothing fancy on top of it is needed to have a good time with you. It's just you I need to have fun, nothing else.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-title="After the Date">
+    <div class="slide-inner">
+      <div class="ornament">${HEART}</div>
+      <p class="eyebrow">After the Date</p>
+      <div class="content">
+        <p>That date night, after the date, was memorable too. Of all the days, it was this one where I almost lost control. I was fighting hard, real hard (pun intended), to not let go of my self-restraint given all the heated moments. One thing I realise is that I truly want to have you in every way possible. The physical part is definitely right amongst the top of that list too. But for me, the thing that has held more importance ever since I started talking to you, given your initial hesitations and boundaries, is to not do anything that leads you to even have the doubt that I'm no different from all the other guys who may have approached or desired you. Gaining your trust and comfort, and entering your safe zone, has till now been my top priority. Everything else can wait. Also, early on you questioned what I myself had once told you about most people - that they conflate love with lust and use the term love very casually. I must admit I questioned myself on that multiple times in my head. At first I was not able to find a conclusive answer, but then I started to pay attention to what I was doing in those intimate moments. After careful thought I felt that even in those moments I was always trying to prioritize you rather than myself. I don't know how you see those moments, but all I was doing was for you to have a good time, given what you'd said - that you had not even tried self-love. I wanted you to know how ecstasy felt. So even though I was pathetic at it, my sole focus was for you to have that wonderful experience, which I believe you got to witness in the later days. I never tried to prioritize myself in those moments, and to me that is love - where you tend to care about your partner rather than fulfil your own desires at all costs. You may see that in a different light, but for me it was not lust, for lust has no space for the comfort of others. It's an egotistical aspect of intimacy, where there's little space for how the other person feels, their comfort, and their emotional expectations. I would like to know your take on this now that some time has passed since our trip.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-title="The Phone Call">
+    <div class="slide-inner">
+      <div class="ornament">${HEART}</div>
+      <p class="eyebrow">The Phone Call</p>
+      <div class="content">
+        <p>While I'm expressing my feelings about that fateful night, it would be incomplete of me not to address a strong emotion I felt that night. When that guy called you late in the dead of night, my heart sank for a bit. You were quick to let me know that you two hadn't been in touch for a long time, and that it was an unsolicited call. Yet those words did not entirely placate me - it was an uncomfortable feeling for me. I am still at a loss to clearly express through words what I felt at that time. However, I did a good amount of thinking that night after you were asleep. I came to the conclusion that the call was not within your control, and I cannot hold you accountable for it as it was not of your own volition. I woke up early with this thought and went out to the ghats to sit with it, and also to buy you flowers, since it was the penultimate day and the next day I might not have gotten the time to buy any, without a bike. I had made my peace with that episode in every way.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-title="Options">
+    <div class="slide-inner">
+      <div class="ornament">${HEART}</div>
+      <p class="eyebrow">Options</p>
+      <div class="content">
+        <p>At this point, though, I would stray away from the trip discussion for a bit. I would like to mention here one thing that made me a bit anxious. The call did not bother me much, and I was able to come to terms with it because you had absolutely no control over it. But when you say something, I pay attention to it, because I believe words deserve attention and are rooted in how we feel. In this light, I found that comment of yours about having "options" after marriage as well, a bit concerning. So here is my heart laid bare. Probably I felt insecure because of the options you have had, and my fear of you still calling those options, particularly after we have expressed our feelings for each other. Honestly, I'll be dismayed if such instances recur in the future too. Maybe the onus here lies on you to make me feel that these are no real options for you, 'cause options could be availed, and the mere thought of you availing those options leaves my heart bruised. Aapko pata hai, the one thing I fear most is heartbreak. I don't mean to say that once we are together you have no exit if things go wrong - I will let you go if it comes to that. But while we are together and enjoying each other's company, I cannot even imagine the thought of you considering anyone as an option. It hurt me when you said that. Maybe you used the word "option" casually, without much thought, but I try to pay good attention to words and the context in which they're used. So this is one thing I would like you to consider. The crux being, I need to feel safe in this relationship. This is the only thing I ask of you.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-title="Saturday">
+    <div class="slide-inner">
+      <div class="ornament">${HEART}</div>
+      <p class="eyebrow">Saturday</p>
+      <div class="content">
+        <p>Coming back to the trip, Saturday felt particularly heavy. Subah, that morning tea with you and us sitting on the sofa got me wondering that soon this was about to end. I was a bit reticent that morning because I really did not want the trip to end so soon. Reh reh k dimaag mai aa rha tha ki this beautiful journey was coming to an end. That day, however, I remember that one hug you gave me from behind while we were in the kitchen. It felt different. I felt as if you were trying to say that you were there for me and I should not worry, that it was only the trip that was coming to an end but in reality it was the start of something very beautiful. I could hear all this even though you did not utter a single word. That was a wonderful feeling to have. Then our trip to Haridwar, and us sitting at Har ki Pauri, holding hands and staying close to each other amidst all the people, made me feel that no force could move us apart. Standing in the Ganges that day, I was kind of praying along these lines to the goddess, to not let us drift apart. Overall the day had a bittersweet feeling - bitter because the trip was about to end, sweet because it was one where I had created great memories lasting a lifetime.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-title="The Walk Back">
+    <div class="slide-inner">
+      <div class="ornament">${HEART}</div>
+      <p class="eyebrow">The Walk Back</p>
+      <div class="content">
+        <p>That day I also got to see the headstrong side of you when we were trying to find an auto after returning the bike. It was really brave of you to even consider going on foot back to Sukoon. I was a bit fearful because of the newness of the city, and we had little idea of how the localities were. I would say here that we would have been wrong if we had done that - travelling the lanes of Rishikesh at 10 PM at night would have been inviting trouble. I understand your reasoning as to how exploitative the auto walas were, but I would say we are responsible for our own safety. At that point I was almost certain we were going back on foot and there was no other way. Then luckily we found that old uncle driving an e-rickshaw, and we safely returned home. Maybe an example of fortune favouring the brave, but I would still like to prioritize our safety, particularly yours, over saving a few bucks. Must say you are a fierce girl who does not shy away from taking bold calls. The only thing I would like you to consider is prioritizing safety above all else.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-title="Sukoon">
+    <div class="slide-inner">
+      <div class="ornament">${HEART}</div>
+      <p class="eyebrow">Sukoon</p>
+      <div class="content">
+        <p>We reached Sukoon and prepared food, did all the chores at 11 PM at night - said something about us. We both don't shy away from things that must be done. Even on the last day we prepared two meals before heading out to the airport. We prioritize the essentials even when it's difficult. And we were able to do all that because we have our priorities aligned - clean, home-cooked meals. Honestly, I loved those cooking sessions with you. I'm glad I could assist you in whatever way possible. Sukoon was true to it's name. I felt at peace with you by my side and everything single thing we did together felt comforting.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-title="The Airport, Again">
+    <div class="slide-inner">
+      <div class="ornament">${HEART}</div>
+      <p class="eyebrow">The Airport, Again</p>
+      <div class="content">
+        <p>Of the events at the airport on the day of our return, you know what felt most special to me. The long hug, the flying kisses, and you grabbing them, must have made many people watching us feel like they were missing out in life. I truly had never expected that I was capable of doing those things in public. But as I have mentioned before, with you around, all the noise outside and inside kind of starts fading, and I just start living the moment. I can vividly remember all of those events. Then, this part I've discussed with you multiple times, but I should mention it again because it was really special for me. You calling me back to wave goodbye just before I was about to disappear from your line of sight while boarding was probably the most romantic moment for me. That image of you standing a level above me, waving goodbye, was screaming of the affection we had developed over quite some time. I just need to close my eyes to visualize that moment. That act in itself spoke more than a thousand words could convey. I was truly glad in that moment to have met you, known you, and fallen for you. You have told me that you are not very expressive and use words sparingly - I kind of agree with that, but this single action of yours conveyed more than I wished to hear.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-title="Somewhere Above Lucknow">
+    <div class="slide-inner">
+      <div class="ornament">${HEART}</div>
+      <p class="eyebrow">Somewhere Above Lucknow</p>
+      <div class="content">
+        <p>While I was mid-flight above Lucknow, I got to read the heartfelt message you had sent out. It was a short and sweet message, and it is then that I promised myself to write out this note. Probably I should have written a smaller note, just like you. But I could not have done justice that way - I need way more words to be expressive. And the mere act of journalling the events that felt significant to me has made me relive the entire 9 days all over again. I have relived the entirety of the trip while trying to journal this, and with it, my conviction about you has grown ever stronger. I am very sure that I could live the rest of my life with you. It would be a great pleasure, in fact, to have you in my life. You make me whole, girl. I know this for sure. You bring out the best in me, and all the different sides of you that I have come to know so far make me wonder how someone could be so versatile. How could all of those personas reside in a single body. I am truly amazed by you, girl, and my heart and soul belong to you, now and forever. ❤️</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide closing" data-title="P.S.">
+    <div class="slide-inner">
+      <div class="ornament">${HEART}</div>
+      <p class="eyebrow">P.S.</p>
+      <div class="content">
+        <p>Nine days, a thousand memories, and one certainty I keep coming back to: you're my best friend, my first kiss, and the girl I want beside me for good. 🤍</p>
+      </div>
+      <div class="signature">
+        <p class="love">With all my love,</p>
+        <p class="name">Hemant</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="nav">
+  <button id="prevBtn" aria-label="Previous">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>
+  </button>
+  <button id="nextBtn" aria-label="Next">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+  </button>
+</div>
+
+<div class="counter" id="counter">1 / 23</div>
+<div class="hint" id="hint">swipe up, or tap the arrows</div>
+
+<script>
+(function(){
+  var HEART_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.35-9.5-8.5C.7 8.1 2.2 4.5 5.7 4c2-.3 3.6.7 4.9 2.6C11.9 4.7 13.5 3.7 15.5 4c3.5.5 5 4.1 3.2 7.5C20.7 16.65 12 20 12 20z"/></svg>';
+  document.querySelectorAll('.ornament').forEach(function(el){
+    el.innerHTML = HEART_SVG;
+  });
+
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var total = slides.length;
+  var current = 0;
+  var progressFill = document.getElementById('progressFill');
+  var counter = document.getElementById('counter');
+  var prevBtn = document.getElementById('prevBtn');
+  var nextBtn = document.getElementById('nextBtn');
+  var hint = document.getElementById('hint');
+
+  function render(){
+    slides.forEach(function(s, i){
+      s.classList.toggle('active', i === current);
+    });
+    progressFill.style.width = ((current+1)/total*100) + '%';
+    counter.textContent = (current+1) + ' / ' + total;
+    prevBtn.disabled = current === 0;
+    nextBtn.disabled = current === total - 1;
+    hint.style.opacity = current === 0 ? '1' : (current < 3 ? '.55' : '0');
+  }
+
+  function goTo(index){
+    if(index < 0 || index > total - 1 || index === current) return;
+    current = index;
+    render();
+  }
+
+  function next(){ goTo(current + 1); }
+  function prev(){ goTo(current - 1); }
+
+  prevBtn.addEventListener('click', prev);
+  nextBtn.addEventListener('click', next);
+  document.getElementById('beginBtn').addEventListener('click', next);
+
+  window.addEventListener('keydown', function(e){
+    if(['ArrowDown','ArrowRight',' ','PageDown'].indexOf(e.key) > -1){ e.preventDefault(); next(); }
+    if(['ArrowUp','ArrowLeft','PageUp'].indexOf(e.key) > -1){ e.preventDefault(); prev(); }
+    if(e.key === 'Home'){ goTo(0); }
+    if(e.key === 'End'){ goTo(total-1); }
+  });
+
+  // touch / swipe
+  var touchStartX = 0, touchStartY = 0, touchActive = false;
+  document.addEventListener('touchstart', function(e){
+    if(e.touches.length !== 1) return;
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    touchActive = true;
+  }, {passive:true});
+
+  document.addEventListener('touchend', function(e){
+    if(!touchActive) return;
+    touchActive = false;
+    var dx = e.changedTouches[0].clientX - touchStartX;
+    var dy = e.changedTouches[0].clientY - touchStartY;
+    var absDx = Math.abs(dx), absDy = Math.abs(dy);
+    var threshold = 46;
+    if(absDy > absDx && absDy > threshold){
+      if(dy < 0){ next(); } else { prev(); }
+    } else if(absDx > absDy && absDx > threshold){
+      if(dx < 0){ next(); } else { prev(); }
+    }
+  }, {passive:true});
+
+  // mouse wheel (desktop, subtle)
+  var wheelLock = false;
+  window.addEventListener('wheel', function(e){
+    if(wheelLock) return;
+    if(Math.abs(e.deltaY) < 24) return;
+    wheelLock = true;
+    if(e.deltaY > 0){ next(); } else { prev(); }
+    setTimeout(function(){ wheelLock = false; }, 550);
+  }, {passive:true});
+
+  render();
+})();
+</script>
+
+</body>
+</html>
